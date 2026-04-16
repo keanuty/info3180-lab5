@@ -9,6 +9,7 @@ from app import app, db
 from app.forms import MovieForm
 from app.models import Movie
 from flask import render_template, request, jsonify, send_file
+from flask_wtf.csrf import generate_csrf
 import os
 from werkzeug.datastructures import CombinedMultiDict
 from werkzeug.utils import secure_filename
@@ -23,9 +24,14 @@ def index():
     return jsonify(message="This is the beginning of our API")
 
 
+@app.route('/api/v1/csrf-token', methods=['GET'])
+def get_csrf():
+    return jsonify({'csrf_token': generate_csrf()})
+
+
 @app.route('/api/v1/movies', methods=['POST'])
 def movies():
-    form = MovieForm(CombinedMultiDict((request.form, request.files)), meta={'csrf': False})
+    form = MovieForm(CombinedMultiDict((request.form, request.files)))
 
     if not form.validate():
         return jsonify(errors=form_errors(form)), 400
