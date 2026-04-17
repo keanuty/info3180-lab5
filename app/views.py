@@ -29,8 +29,28 @@ def get_csrf():
     return jsonify({'csrf_token': generate_csrf()})
 
 
-@app.route('/api/v1/movies', methods=['POST'])
+@app.route('/api/v1/posters/<filename>', methods=['GET'])
+def get_poster(filename):
+    upload_folder = app.config.get('UPLOAD_FOLDER') or os.path.join(app.root_path, 'uploads')
+    return send_file(os.path.join(upload_folder, filename))
+
+
+@app.route('/api/v1/movies', methods=['GET', 'POST'])
 def movies():
+    if request.method == 'GET':
+        movies = Movie.query.all()
+        movie_list = []
+
+        for movie in movies:
+            movie_list.append({
+                "id": movie.id,
+                "title": movie.title,
+                "description": movie.description,
+                "poster": f"/api/v1/posters/{movie.poster}"
+            })
+
+        return jsonify(movies=movie_list)
+
     form = MovieForm(CombinedMultiDict((request.form, request.files)))
 
     if not form.validate():
