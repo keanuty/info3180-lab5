@@ -35,22 +35,8 @@ def get_poster(filename):
     return send_file(os.path.join(upload_folder, filename))
 
 
-@app.route('/api/v1/movies', methods=['GET', 'POST'])
+@app.route('/api/v1/movies', methods=['POST'])
 def movies():
-    if request.method == 'GET':
-        movies = Movie.query.all()
-        movie_list = []
-
-        for movie in movies:
-            movie_list.append({
-                "id": movie.id,
-                "title": movie.title,
-                "description": movie.description,
-                "poster": f"/api/v1/posters/{movie.poster}"
-            })
-
-        return jsonify(movies=movie_list)
-
     form = MovieForm(CombinedMultiDict((request.form, request.files)))
 
     if not form.validate():
@@ -75,6 +61,22 @@ def movies():
         poster=movie.poster,
         description=movie.description
     ), 201
+
+
+@app.route('/api/v1/movies', methods=['GET'])
+def add_movies():
+    movies = Movie.query.all()
+    movie_list = []
+
+    for movie in movies:
+        movie_list.append({
+            "id": movie.id,
+            "title": movie.title,
+            "description": movie.description,
+            "poster": f"/api/v1/posters/{movie.poster}"
+        })
+
+    return jsonify(movies=movie_list)
 
 
 ###
